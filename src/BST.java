@@ -16,94 +16,84 @@ public class BST<K extends Comparable<K>, V> {
         }
     }
 
+    //insert a key-value pair
     public void put(K key, V val) {
         root = put(root, key, val);
     }
 
-    private Node put(Node node, K key, V val) {
-        if (node == null) {
+    //recursively insert into the tree
+    private Node put(Node x, K key, V val) {
+        if (x == null) {
             size++;
             return new Node(key, val);
         }
-
-        int cmp = key.compareTo(node.key);
-        if (cmp < 0) {
-            node.left = put(node.left, key, val);
-        } else if (cmp > 0) {
-            node.right = put(node.right, key, val);
-        } else {
-            node.val = val; // Update value if key already exists
-        }
-        return node;
+        int cmp = key.compareTo(x.key);
+        if (cmp < 0) x.left = put(x.left, key, val);
+        else if (cmp > 0) x.right = put(x.right, key, val);
+        else x.val = val;
+        return x;
     }
 
+    //retrieve the value associated with a given key
     public V get(K key) {
-        Node node = get(root, key);
-        return node == null ? null : node.val;
-    }
-
-    private Node get(Node node, K key) {
-        if (node == null) return null;
-
-        int cmp = key.compareTo(node.key);
-        if (cmp < 0) {
-            return get(node.left, key);
-        } else if (cmp > 0) {
-            return get(node.right, key);
-        } else {
-            return node;
+        Node x = root;
+        while (x != null) {
+            int cmp = key.compareTo(x.key);
+            if (cmp < 0) x = x.left;
+            else if (cmp > 0) x = x.right;
+            else return x.val;
         }
+        return null;
     }
 
+    //delete a node with a given key
     public void delete(K key) {
         root = delete(root, key);
     }
 
-    private Node delete(Node node, K key) {
-        if (node == null) return null;
-
-        int cmp = key.compareTo(node.key);
-        if (cmp < 0) {
-            node.left = delete(node.left, key);
-        } else if (cmp > 0) {
-            node.right = delete(node.right, key);
-        } else {
-            if (node.right == null) return node.left;
-            if (node.left == null) return node.right;
-
-            Node temp = node;
-            node = min(temp.right); // Get the successor
-            node.right = deleteMin(temp.right);
-            node.left = temp.left;
+    //recursively delete
+    private Node delete(Node x, K key) {
+        if (x == null) return null;//base case
+        int cmp = key.compareTo(x.key);
+        if (cmp < 0) x.left = delete(x.left, key);
+        else if (cmp > 0) x.right = delete(x.right, key);
+        else {
+            if (x.right == null) return x.left;
+            if (x.left == null) return x.right;
+            Node t = x;
+            x = min(t.right);
+            x.right = deleteMin(t.right);
+            x.left = t.left;
+            size--;
         }
-        return node;
+        return x;
     }
 
-    private Node min(Node node) {
-        if (node.left == null) return node;
-        return min(node.left);
+    //find the node with the smallest key
+    private Node min(Node x) {
+        if (x.left == null) return x;
+        return min(x.left);
     }
 
-    private Node deleteMin(Node node) {
-        if (node.left == null) return node.right;
-        node.left = deleteMin(node.left);
-        return node;
+    //delete the node with the smallest key
+    private Node deleteMin(Node x) {
+        if (x.left == null) return x.right;
+        x.left = deleteMin(x.left);
+        return x;
     }
 
+    //return an iterable collection of keys in sorted order
     public Iterable<K> iterable() {
         List<K> keys = new ArrayList<>();
         inorder(root, keys);
         return keys;
     }
 
-    private void inorder(Node node, List<K> keys) {
-        if (node == null) return;
-        inorder(node.left, keys);
-        keys.add(node.key);
-        inorder(node.right, keys);
-    }
-
-    public int size() {
-        return size;
+    //perform in-order traversal and collect keys into a list
+    private void inorder(Node x, List<K> keys) {
+        if (x == null) return;
+        inorder(x.left, keys);
+        keys.add(x.key);
+        inorder(x.right, keys);
     }
 }
